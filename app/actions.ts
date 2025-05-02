@@ -6,12 +6,13 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 export const signUpAction = async (formData: FormData) => {
+  const name = formData.get("name")?.toString();
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
 
-  if (!email || !password) {
+  if (!name || !email || !password) {
     return encodedRedirect(
       "error",
       "/sign-up",
@@ -19,7 +20,7 @@ export const signUpAction = async (formData: FormData) => {
     );
   }
 
-  const { error } = await supabase.auth.signUp({
+  const { data: authData, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -31,11 +32,24 @@ export const signUpAction = async (formData: FormData) => {
     console.error(error.code + " " + error.message);
     return encodedRedirect("error", "/sign-up", error.message);
   } else {
-    return encodedRedirect(
-      "success",
-      "/sign-up",
-      "Thanks for signing up! Please check your email for a verification link.",
-    );
+    const userId = authData.user?.id;
+
+    const { error: insertError } = await supabase.from('users').insert({
+      id: userId,
+      name: name
+    });
+
+    if (insertError) {
+      console.error(insertError);
+    }
+    
+    // return encodedRedirect(
+    //   "success",
+    //   "/sign-up",
+    //   "Thanks for signing up! Please check your email for a verification link.",
+    // );
+
+    redirect('/protected/dashboard');
   }
 };
 
