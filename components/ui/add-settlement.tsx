@@ -87,7 +87,6 @@ export default function AddSettlementModal({ open, setOpen, userId }: Props) {
                                     name={name}
                                     value={(form as any)[name]}
                                     onChange={handleChange}
-                                    required
                                 />
                             </FormControl>
                         ))}
