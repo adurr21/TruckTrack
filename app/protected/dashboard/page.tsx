@@ -15,6 +15,11 @@ export default function Dashboard() {
     const [confirmOpen, setConfirmOpen] = useState(false)
     const [deleteId, setDeleteId] = useState<string | null>(null)
 
+    function formatDate(date: String) {
+        const [year, month, day] = date.split('-');
+        return `${month}/${day}/${year}`
+    }
+
     const fetchData = async () => {
         const {
             data: { user },
@@ -78,7 +83,7 @@ export default function Dashboard() {
                         <tbody>
                             {data?.map((row) => (
                                 <tr key={row.sheet_id}>
-                                    <td>{new Date(row.date).toLocaleDateString()}</td>
+                                    <td>{formatDate(row.date)}</td>
                                     <td>{row.truck_num}</td>
                                     <td>{row.dollie_num}</td>
                                     <td>{row.to}</td>

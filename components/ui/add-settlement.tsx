@@ -48,7 +48,7 @@ export default function AddSettlementModal({ open, setOpen, userId }: Props) {
             {
                 ...form,
                 user_id: userId,
-                date: new Date(form.date).toISOString(),
+                date: form.date,
                 pay: parseFloat(form.pay),
             },
         ])
