@@ -7,6 +7,8 @@ import { createClient } from '@/utils/supabase/client'
 import AddSettlementModal from '@/components/ui/add-settlement'
 import ExportCSVButton from '@/components/export-csv'
 
+const PAGE_SIZE = 10;
+
 export default function Dashboard() {
     const supabase = createClient()
     const [data, setData] = useState<any[]>([])
@@ -14,6 +16,7 @@ export default function Dashboard() {
     const [open, setOpen] = useState(false)
     const [confirmOpen, setConfirmOpen] = useState(false)
     const [deleteId, setDeleteId] = useState<string | null>(null)
+    const [page, setPage] = useState(0);
 
     function formatDate(date: String) {
         const [year, month, day] = date.split('-');
@@ -51,6 +54,9 @@ export default function Dashboard() {
         }
     }
 
+    const pageCount = Math.ceil(data.length / PAGE_SIZE);
+    const pageData = data.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
     return (
         <section className="flex items-center flex-col">
             <h1 className="text-center mb-10">TruckTrack Dashboard</h1>
@@ -63,9 +69,9 @@ export default function Dashboard() {
             </div>
 
 
-            <Sheet variant="soft" sx={{ p: 2, maxWidth: '100%' }}>
-                <Box sx={{ overflowX: 'auto', width: '100%' }}>
-                    <Table aria-label="settlements table" stickyHeader sx={{ minWidth: 1000 }}>
+            <Sheet variant="soft" color="neutral" sx={{ p: 2, maxWidth: '100%' }}>
+                <Box sx={{ overflowX: 'auto', width: '100%'}}>
+                    <Table aria-label="settlements table" stickyHeader sx={{ minWidth: 1000, backgroundColor: 'Background.surface' }}>
                         <thead>
                             <tr>
                                 <th>Date</th>
@@ -81,7 +87,7 @@ export default function Dashboard() {
                             </tr>
                         </thead>
                         <tbody>
-                            {data?.map((row) => (
+                            {pageData?.map((row) => (
                                 <tr key={row.sheet_id}>
                                     <td>{formatDate(row.date)}</td>
                                     <td>{row.truck_num}</td>
@@ -109,6 +115,20 @@ export default function Dashboard() {
                     </Table>
                 </Box>
             </Sheet>
+
+            <div className='flex flex-col justify-center items-center mt-4'>
+                <span>
+                    Page {page + 1} of {pageCount}
+                </span>
+                <div className='flex justify-center items-center my-2'>
+                    <Button className="mx-2" disabled={page === 0} sx={{ width: '75px' }} color="neutral" onClick={() => setPage(page - 1)}>
+                        Prev
+                    </Button>
+                    <Button className="mx-2" disabled={page === pageCount - 1} sx={{ width: '75px' }} color="neutral" onClick={() => setPage(page + 1)}>
+                        Next
+                    </Button>
+                </div>
+            </div>
 
             <AddSettlementModal open={open} setOpen={setOpen} userId={userId} />
 
