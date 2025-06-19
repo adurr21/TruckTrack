@@ -7,7 +7,7 @@ import { createClient } from '@/utils/supabase/client'
 import AddSettlementModal from '@/components/ui/add-settlement'
 import ExportCSVButton from '@/components/export-csv'
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 12;
 
 export default function Dashboard() {
     const supabase = createClient()
@@ -121,11 +121,17 @@ export default function Dashboard() {
                     Page {page + 1} of {pageCount}
                 </span>
                 <div className='flex justify-center items-center my-2'>
+                    <Button className="mx-2" disabled={page === 0} sx={{ width: '150px' }} color="neutral" onClick={() => setPage(0)}>
+                        First Page (Oldest Entries)
+                    </Button>
                     <Button className="mx-2" disabled={page === 0} sx={{ width: '75px' }} color="neutral" onClick={() => setPage(page - 1)}>
                         Prev
                     </Button>
                     <Button className="mx-2" disabled={page === pageCount - 1} sx={{ width: '75px' }} color="neutral" onClick={() => setPage(page + 1)}>
                         Next
+                    </Button>
+                    <Button className="mx-2" disabled={page === pageCount - 1} sx={{ width: '150px' }} color="neutral" onClick={() => setPage(pageCount - 1)}>
+                        Last Page (Newest Entries)
                     </Button>
                 </div>
             </div>
