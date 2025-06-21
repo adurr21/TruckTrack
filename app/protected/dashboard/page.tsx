@@ -61,8 +61,8 @@ export default function Dashboard() {
         <section className="flex items-center flex-col">
             <h1 className="text-center mb-10">TruckTrack Dashboard</h1>
 
-            <div className='flex mb-10'>
-                <Button className="mr-5" sx={{ width: '150px' }} color="neutral" onClick={() => setOpen(true)}>
+            <div className='flex mb-10 gap-5'>
+                <Button sx={{ width: '150px' }} color="neutral" onClick={() => setOpen(true)}>
                     Create Job Entry
                 </Button>
                 <ExportCSVButton data={data} filename='settlements.csv' />
@@ -120,17 +120,17 @@ export default function Dashboard() {
                 <span>
                     Page {page + 1} of {pageCount}
                 </span>
-                <div className='flex justify-center items-center my-2'>
-                    <Button className="mx-2" disabled={page === 0} sx={{ width: '150px' }} color="neutral" onClick={() => setPage(0)}>
+                <div className='flex justify-center items-center my-2 gap-2'>
+                    <Button disabled={page === 0} sx={{ width: '150px' }} color="neutral" onClick={() => setPage(0)}>
                         First Page (Oldest Entries)
                     </Button>
-                    <Button className="mx-2" disabled={page === 0} sx={{ width: '75px' }} color="neutral" onClick={() => setPage(page - 1)}>
+                    <Button disabled={page === 0} sx={{ width: '75px' }} color="neutral" onClick={() => setPage(page - 1)}>
                         Prev
                     </Button>
-                    <Button className="mx-2" disabled={page === pageCount - 1} sx={{ width: '75px' }} color="neutral" onClick={() => setPage(page + 1)}>
+                    <Button disabled={page === pageCount - 1} sx={{ width: '75px' }} color="neutral" onClick={() => setPage(page + 1)}>
                         Next
                     </Button>
-                    <Button className="mx-2" disabled={page === pageCount - 1} sx={{ width: '150px' }} color="neutral" onClick={() => setPage(pageCount - 1)}>
+                    <Button disabled={page === pageCount - 1} sx={{ width: '150px' }} color="neutral" onClick={() => setPage(pageCount - 1)}>
                         Last Page (Newest Entries)
                     </Button>
                 </div>
