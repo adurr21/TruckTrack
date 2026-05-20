@@ -2,14 +2,13 @@
 
 import {
     Modal,
-    ModalDialog,
-    FormControl,
-    FormLabel,
-    Input,
-    Typography,
-    Box,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalFooter,
     Button,
-} from '@mui/joy'
+    Input,
+} from '@heroui/react'
 import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 
@@ -61,46 +60,49 @@ export default function AddSettlementModal({ open, setOpen, userId }: Props) {
         setLoading(false)
     }
 
+    const fields = [
+        ['date', 'Date'],
+        ['truck_num', 'Truck #'],
+        ['dollie_num', 'Dollie #'],
+        ['to', 'To'],
+        ['from', 'From'],
+        ['pro_no', 'Pro No'],
+        ['trailer_num', 'Trailer #'],
+        ['paysheet_num', 'Pay Sheet #'],
+        ['pay', 'Gross Pay'],
+    ] as const
+
     return (
-        <Modal open={open} onClose={() => setOpen(false)}>
-            <ModalDialog aria-labelledby="create-job" layout="center" sx={{ width: 500, maxHeight: '90vh', overflowY: 'auto', scrollPaddingBottom: 'env(safe-area-inset-bottom)' }}>
-                <Typography id="create-job" level="h4" mb={1}>
-                    New Settlement
-                </Typography>
+        <Modal isOpen={open} onOpenChange={setOpen} size="lg">
+            <ModalContent>
+                <ModalHeader className="flex flex-col gap-1">New Settlement</ModalHeader>
                 <form onSubmit={handleSubmit}>
-                    <Box display="grid" gap={1.5}>
-                        {[
-                            ['date', 'Date'],
-                            ['truck_num', 'Truck #'],
-                            ['dollie_num', 'Dollie #'],
-                            ['to', 'To'],
-                            ['from', 'From'],
-                            ['pro_no', 'Pro No'],
-                            ['trailer_num', 'Trailer #'],
-                            ['paysheet_num', 'Pay Sheet #'],
-                            ['pay', 'Gross Pay'],
-                        ].map(([name, label]) => (
-                            <FormControl key={name}>
-                                <FormLabel>{label}</FormLabel>
+                    <ModalBody>
+                        <div className="flex flex-col gap-4">
+                            {fields.map(([name, label]) => (
                                 <Input
+                                    key={name}
                                     type={name === 'date' ? 'date' : name === 'pay' ? 'number' : 'text'}
+                                    label={label}
                                     name={name}
                                     value={(form as any)[name]}
                                     onChange={handleChange}
+                                    required
+                                    step={name === 'pay' ? '0.01' : undefined}
                                 />
-                            </FormControl>
-                        ))}
-                        <Box display="flex" justifyContent="flex-end" gap={1} mt={1}>
-                            <Button type="button" variant="plain" color="neutral" onClick={() => setOpen(false)}>
-                                Cancel
-                            </Button>
-                            <Button type="submit" loading={loading}>
-                                Submit
-                            </Button>
-                        </Box>
-                    </Box>
+                            ))}
+                        </div>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button color="default" variant="light" onPress={() => setOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button color="primary" type="submit" isLoading={loading}>
+                            Submit
+                        </Button>
+                    </ModalFooter>
                 </form>
-            </ModalDialog>
+            </ModalContent>
         </Modal>
     )
 }
