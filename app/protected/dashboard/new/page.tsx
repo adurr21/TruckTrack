@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button, Card, CardBody, CardHeader, Input } from "@heroui/react";
@@ -32,7 +32,6 @@ const fields = [
 
 export default function NewDashboardEntryPage() {
   const router = useRouter();
-  const supabase = useMemo(() => createClient(), []);
   const [form, setForm] = useState(initialForm);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,6 +41,7 @@ export default function NewDashboardEntryPage() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
+    const supabase = createClient();
     e.preventDefault();
     setError(null);
     setLoading(true);

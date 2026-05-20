@@ -33,7 +33,6 @@ type SortKey = 'date' | 'truck_num' | 'dollie_num' | 'to' | 'from' | 'pro_no' | 
 type SortOrder = 'asc' | 'desc';
 
 export default function Dashboard() {
-    const supabase = createClient()
     const router = useRouter()
     const [data, setData] = useState<any[]>([])
     const [confirmOpen, setConfirmOpen] = useState(false)
@@ -54,6 +53,7 @@ export default function Dashboard() {
     }
 
     const fetchData = async () => {
+        const supabase = createClient()
         const {
             data: { user },
         } = await supabase.auth.getUser()
@@ -74,6 +74,7 @@ export default function Dashboard() {
     }, [])
 
     const handleDelete = async () => {
+        const supabase = createClient()
         console.warn("Deleting ID: ", deleteId);
         if (!deleteId) return
         const { error } = await supabase.from('settlements').delete().eq('sheet_id', deleteId)
