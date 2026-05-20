@@ -1,6 +1,6 @@
 'use client'
 
-import { Button } from '@mui/joy'
+import { Button } from "@heroui/react"
 
 interface ExportCSVButtonProps {
     data: any[]
@@ -33,7 +33,11 @@ export default function ExportCSVButton({ data, filename = 'data.csv' }: ExportC
     }
 
     return (
-        <Button sx={{ width: '150px' }}color="success" onClick={exportToCSV}>
+        <Button 
+            color="success" 
+            onClick={exportToCSV}
+            className="w-[150px]"
+        >
             Export to CSV
         </Button>
     )

@@ -1,31 +1,31 @@
 import Link from "next/link";
-import { Badge } from "./ui/badge";
-import { Button } from "./ui/button";
+import { Button, Chip } from "@heroui/react";
 
 export function EnvVarWarning() {
   return (
     <div className="flex gap-4 items-center">
-      <Badge variant={"outline"} className="font-normal">
+      <Chip variant="flat" className="font-normal">
         Supabase environment variables required
-      </Badge>
+      </Chip>
       <div className="flex gap-2">
         <Button
-          asChild
+          as={Link}
+          href="/sign-in"
           size="sm"
-          variant={"outline"}
-          disabled
-          className="opacity-75 cursor-none pointer-events-none"
+          variant="bordered"
+          isDisabled
+          className="opacity-75"
         >
-          <Link href="/sign-in">Sign in</Link>
+          Sign in
         </Button>
         <Button
-          asChild
+          as={Link}
+          href="/sign-up"
           size="sm"
-          variant={"default"}
-          disabled
-          className="opacity-75 cursor-none pointer-events-none"
+          isDisabled
+          className="opacity-75"
         >
-          <Link href="/sign-up">Sign up</Link>
+          Sign up
         </Button>
       </div>
     </div>
