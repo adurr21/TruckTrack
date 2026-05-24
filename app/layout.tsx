@@ -4,6 +4,7 @@ import { ThemeSwitcher } from "@/components/theme-switcher";
 import { hasEnvVars } from "@/utils/supabase/check-env-vars";
 import { HeroUIProvider } from "@heroui/react";
 import { Geist } from "next/font/google";
+import Script from "next/script";
 import { ThemeProvider } from "next-themes";
 import Link from "next/link";
 import "./globals.css";
@@ -31,6 +32,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={geistSans.className} suppressHydrationWarning>
       <body className="bg-background text-foreground">
+        <Script src="/runtime-env.js" strategy="beforeInteractive" />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
