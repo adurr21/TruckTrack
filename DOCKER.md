@@ -18,6 +18,7 @@ This guide provides instructions for building and running TruckTrack in Docker, 
 - **Environment Variables**: Passed at runtime, never stored in image
 - **GitHub Secrets**: Used for CI/CD, never exposed in image
 - **Your Server**: Keeps `.env.local` locally - this file is NEVER committed to git
+- **Browser Runtime Config**: The app now loads Supabase browser config from `/runtime-env.js` at request time, so Portainer or Docker runtime env vars are used without rebuilding the image
 
 ### Recommended Workflow
 
@@ -135,6 +136,8 @@ docker run -p 3000:3000 \
   ghcr.io/your-username/your-repo:latest
 ```
 
+These variables are read by the running container and exposed to the browser through `/runtime-env.js`, so you do not need to rebuild the image after setting them.
+
 **Option B: Docker Compose (Recommended for Production)**
 
 Create a `.env.local` file **only on your docker server** (never in git):
@@ -235,6 +238,9 @@ The multi-stage build:
 - Or use `-e` flag when running: `docker run -e VAR=value ...`
 - Don't forget variables are case-sensitive
 - **Do NOT put env vars in the Dockerfile** - always pass at runtime
+- If you use Portainer, add the env vars to the container or stack service itself and fully recreate or restart the container after changes
+- Verify the running container is serving runtime config by opening `/runtime-env.js` in the browser or curling it from the container host
+- If `/runtime-env.js` shows empty values, the vars are not attached to the running container even if they exist elsewhere in Portainer
 
 ### Secrets exposed in logs
 - Never echo or log environment variables
