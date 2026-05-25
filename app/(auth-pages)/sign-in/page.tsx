@@ -29,11 +29,11 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
           label="Password"
           placeholder="Your password"
           required
-          description={
-            <Link className="text-xs underline" href="/forgot-password">
-              Forgot Password?
-            </Link>
-          }
+          // description={
+          //   <Link className="text-xs underline" href="/forgot-password">
+          //     Forgot Password?
+          //   </Link>
+          // }
         />
         <SubmitButton pendingText="Signing In..." formAction={signInAction} color="primary">
           Sign in

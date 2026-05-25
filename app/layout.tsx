@@ -1,7 +1,5 @@
-import { EnvVarWarning } from "@/components/env-var-warning";
-import HeaderAuth from "@/components/header-auth";
+import RuntimeAuthNav from "@/components/runtime-auth-nav";
 import { ThemeSwitcher } from "@/components/theme-switcher";
-import { hasEnvVars } from "@/utils/supabase/check-env-vars";
 import { HeroUIProvider } from "@heroui/react";
 import { Geist } from "next/font/google";
 import Script from "next/script";
@@ -47,7 +45,7 @@ export default function RootLayout({
                     <div className="flex gap-5 items-center font-semibold">
                       <Link className="text-2xl" href={"/"}>TruckTrack</Link>
                     </div>
-                    {!hasEnvVars ? <EnvVarWarning /> : <HeaderAuth />}
+                    <RuntimeAuthNav />
                   </div>
                 </nav>
               <div className="flex flex-col gap-20 max-w-5xl p-5">
