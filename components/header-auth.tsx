@@ -1,6 +1,6 @@
 import { signOutAction } from "@/app/actions";
 import Link from "next/link";
-import Button from "@mui/joy/Button";
+import { Button } from "@heroui/react";
 import { createClient } from "@/utils/supabase/server";
 
 export default async function AuthButton() {
@@ -22,25 +22,19 @@ export default async function AuthButton() {
     <div className="flex items-center gap-4">
       Hey, {profile?.name || user.email || "there"}!
       <form action={signOutAction}>
-        <Button type="submit" variant="solid" color="primary">
+        <Button type="submit" color="primary" variant="solid" isLoading={false}>
           Sign out
         </Button>
       </form>
     </div>
   ) : (
     <div className="flex gap-2">
-      <Link
-        className="rounded-md bg-primary px-4 py-2 text-white"
-        href="/sign-in"
-      >
+      <Button as={Link} href="/sign-in" color="primary" variant="solid">
         Sign in
-      </Link>
-      <Link
-        className="rounded-md bg-primary px-4 py-2 text-white"
-        href="/sign-up"
-      >
+      </Button>
+      <Button as={Link} href="/sign-up" color="primary" variant="solid">
         Sign up
-      </Link>
+      </Button>
     </div>
   );
 }

@@ -1,14 +1,13 @@
 "use client";
 import {
   Modal,
-  ModalDialog,
-  FormControl,
-  FormLabel,
-  Input,
-  Typography,
-  Box,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
   Button,
-} from "@mui/joy";
+  Input,
+} from "@heroui/react";
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import type { SettlementInsert } from "@/types/database";
@@ -35,14 +34,12 @@ const fields = [
   ["paysheet_num", "Pay Sheet #"],
   ["pay", "Gross Pay"],
 ] as const;
-const MAX = 100;
 type Props = {
   open: boolean;
   setOpen: (value: boolean) => void;
   userId: string | null;
   onCreated?: () => Promise<void>;
 };
-
 export default function AddSettlementModal({
   open,
   setOpen,
@@ -52,12 +49,12 @@ export default function AddSettlementModal({
   const [supabase, setSupabase] = useState<ReturnType<
     typeof createClient
   > | null>(null);
-  useEffect(() => {
-    setSupabase(createClient());
-  }, []);
   const [form, setForm] = useState(initialForm);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    setSupabase(createClient());
+  }, []);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -67,13 +64,13 @@ export default function AddSettlementModal({
       fields.some(
         ([name]) => name !== "date" && name !== "pay" && !form[name].trim(),
       ) ||
-      Number.isNaN(Number(form.pay)) ||
       !Number.isFinite(Number(form.pay)) ||
-      Number(form.pay) < 0
+      Number(form.pay) < 0 ||
+      fields.some(([name]) => name !== "date" && form[name].length > 100)
     )
-      return setError("Complete all fields with a valid non-negative amount.");
-    if (fields.some(([name]) => name !== "pay" && form[name].length > MAX))
-      return setError(`Text fields must be ${MAX} characters or fewer.`);
+      return setError(
+        "Complete all fields with valid values under 100 characters.",
+      );
     setLoading(true);
     const payload: SettlementInsert = {
       user_id: userId,
@@ -97,30 +94,20 @@ export default function AddSettlementModal({
     await onCreated?.();
   };
   return (
-    <Modal open={open} onClose={() => !loading && setOpen(false)}>
-      <ModalDialog
-        aria-labelledby="create-job"
-        aria-describedby="create-job-description"
-        layout="center"
-        sx={{ width: 500, maxHeight: "90vh", overflowY: "auto" }}
-      >
-        <Typography id="create-job" level="h4">
-          New Settlement
-        </Typography>
-        <Typography id="create-job-description">
-          Enter the details for this settlement.
-        </Typography>
-        {error && (
-          <Typography color="danger" role="alert">
-            {error}
-          </Typography>
-        )}
+    <Modal isOpen={open} onOpenChange={setOpen} size="lg">
+      <ModalContent>
+        <ModalHeader>New Settlement</ModalHeader>
         <form onSubmit={handleSubmit}>
-          <Box display="grid" gap={1.5}>
-            {fields.map(([name, label]) => (
-              <FormControl key={name}>
-                <FormLabel htmlFor={`settlement-${name}`}>{label}</FormLabel>
+          <ModalBody>
+            <div className="flex flex-col gap-4">
+              {error && (
+                <p role="alert" className="text-danger">
+                  {error}
+                </p>
+              )}
+              {fields.map(([name, label]) => (
                 <Input
+                  key={name}
                   id={`settlement-${name}`}
                   type={
                     name === "date"
@@ -129,30 +116,32 @@ export default function AddSettlementModal({
                         ? "number"
                         : "text"
                   }
-                  inputMode={name === "pay" ? "decimal" : undefined}
+                  label={label}
                   name={name}
                   value={form[name]}
                   onChange={(e) => setForm({ ...form, [name]: e.target.value })}
                   required
+                  step={name === "pay" ? "0.01" : undefined}
                 />
-              </FormControl>
-            ))}
-            <Box display="flex" justifyContent="flex-end" gap={1}>
-              <Button
-                type="button"
-                variant="plain"
-                disabled={loading}
-                onClick={() => setOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" loading={loading}>
-                Submit
-              </Button>
-            </Box>
-          </Box>
+              ))}
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <Button
+              type="button"
+              color="default"
+              variant="light"
+              isDisabled={loading}
+              onPress={() => setOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button color="primary" type="submit" isLoading={loading}>
+              Submit
+            </Button>
+          </ModalFooter>
         </form>
-      </ModalDialog>
+      </ModalContent>
     </Modal>
   );
 }

@@ -1,5 +1,5 @@
 "use client";
-import { Button } from "@mui/joy";
+import { Button } from "@heroui/react";
 import type { Settlement } from "@/types/database";
 
 export const SETTLEMENT_CSV_COLUMNS: Array<[keyof Settlement, string]> = [
@@ -21,11 +21,13 @@ export function escapeCsvValue(value: unknown) {
 export function settlementsToCsv(data: Settlement[]) {
   return `\uFEFF${SETTLEMENT_CSV_COLUMNS.map(([, header]) => escapeCsvValue(header)).join(",")}\n${data.map((row) => SETTLEMENT_CSV_COLUMNS.map(([key]) => escapeCsvValue(key === "pay" ? row.pay.toFixed(2) : row[key])).join(",")).join("\n")}`;
 }
-type Props = { data: Settlement[]; filename?: string };
 export default function ExportCSVButton({
   data,
   filename = "data.csv",
-}: Props) {
+}: {
+  data: Settlement[];
+  filename?: string;
+}) {
   const exportToCSV = () => {
     if (!data.length) return;
     const blob = new Blob([settlementsToCsv(data)], {
@@ -40,10 +42,10 @@ export default function ExportCSVButton({
   };
   return (
     <Button
-      sx={{ width: 150 }}
       color="success"
-      disabled={!data.length}
-      onClick={exportToCSV}
+      isDisabled={!data.length}
+      onPress={exportToCSV}
+      className="w-[150px]"
     >
       Export to CSV
     </Button>

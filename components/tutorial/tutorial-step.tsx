@@ -1,4 +1,4 @@
-import { Checkbox } from "../ui/checkbox";
+import { Checkbox } from "@heroui/react";
 
 export function TutorialStep({
   title,
@@ -8,23 +8,19 @@ export function TutorialStep({
   children: React.ReactNode;
 }) {
   return (
-    <li className="relative">
-      <Checkbox
-        id={title}
-        name={title}
-        className={`absolute top-[3px] mr-2 peer`}
-      />
-      <label
-        htmlFor={title}
-        className={`relative text-base text-foreground peer-checked:line-through font-medium`}
-      >
-        <span className="ml-8">{title}</span>
-        <div
-          className={`ml-8 text-sm peer-checked:line-through font-normal text-muted-foreground`}
+    <li className="relative flex gap-4">
+      <Checkbox id={title} name={title} className="mt-1" />
+      <div className="flex-1">
+        <label
+          htmlFor={title}
+          className="text-base text-foreground font-medium cursor-pointer"
         >
+          {title}
+        </label>
+        <div className="text-sm text-foreground/70 font-normal mt-1">
           {children}
         </div>
-      </label>
+      </div>
     </li>
   );
 }
