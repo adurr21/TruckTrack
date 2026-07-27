@@ -96,12 +96,14 @@ Ensure GitHub Actions is enabled in your repository settings.
 The workflow is already configured in `.github/workflows/docker-build-push.yml`
 
 **Triggers:**
+
 - Pushes to `main` or `develop` branches
 - Git tags matching `v*` pattern (e.g., `v1.0.0`)
 - Pull requests to `main` or `develop`
 
 **On pull requests:** Images are built but not pushed
 **On merge to main/develop:** Images are pushed to GHCR with tags:
+
 - `latest` (for main branch)
 - Branch name (e.g., `develop`, `main`)
 - Git SHA for traceability
@@ -129,6 +131,7 @@ docker pull ghcr.io/your-username/your-repo:latest
 ### 5. Run on Private Server with Secrets
 
 **Option A: Command Line (for testing)**
+
 ```bash
 docker run -p 3000:3000 \
   -e NEXT_PUBLIC_SUPABASE_URL="https://your-project.supabase.co" \
@@ -148,8 +151,9 @@ Create a `.env.local` file **only on your docker server** (never in git):
 ```
 
 Create `docker-compose.prod.yml`:
+
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   trucktrack:
@@ -161,10 +165,18 @@ services:
       - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
       - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
     env_file:
-      - .env.local  # ⚠️ This file stays on your server, NEVER in git
+      - .env.local # ⚠️ This file stays on your server, NEVER in git
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:3000",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -172,12 +184,14 @@ services:
 ```
 
 Create `.env.local` on your server:
+
 ```
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
 ```
 
 Then run:
+
 ```bash
 docker-compose -f docker-compose.prod.yml up -d
 ```
@@ -187,7 +201,7 @@ docker-compose -f docker-compose.prod.yml up -d
 Create a `docker-compose.prod.yml` on your docker server:
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   trucktrack:
@@ -202,7 +216,15 @@ services:
       - .env.local
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:3000",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -218,6 +240,7 @@ docker-compose -f docker-compose.prod.yml up -d
 ## Image Size and Performance
 
 The multi-stage build:
+
 - Keeps the final image lean (~300-400MB)
 - Only includes production dependencies
 - Uses non-root user for security
@@ -227,12 +250,14 @@ The multi-stage build:
 ## Troubleshooting
 
 ### Container won't start
+
 - Check logs: `docker-compose logs trucktrack`
 - Verify environment variables are passed correctly
 - Ensure Supabase credentials are valid
 - Check that .env.local (if used) is readable
 
 ### Environment variables not loading in container
+
 - Ensure `.env.local` is in the same directory as `docker-compose.yml`
 - Verify `env_file: - .env.local` is in docker-compose
 - Or use `-e` flag when running: `docker run -e VAR=value ...`
@@ -243,11 +268,13 @@ The multi-stage build:
 - If `/runtime-env.js` shows empty values, the vars are not attached to the running container even if they exist elsewhere in Portainer
 
 ### Secrets exposed in logs
+
 - Never echo or log environment variables
 - Use `env | grep SUPABASE` to test locally, but not in production
 - Check docker logs don't contain sensitive data: `docker logs container-name`
 
 ### GHCR Authentication Issues
+
 - PAT token may be expired or revoked
 - Generate a new token and update Docker login
 - Ensure token has `write:packages` scope (includes `read:packages`)
@@ -256,6 +283,7 @@ The multi-stage build:
 ## CI/CD Pipeline Details
 
 The GitHub Actions workflow:
+
 1. Triggers on push/PR to main/develop or on version tags
 2. Sets up Docker Buildx for optimized builds
 3. Authenticates with GHCR using GitHub Actions secrets
@@ -266,6 +294,7 @@ The GitHub Actions workflow:
 ## Security Notes
 
 ### Secrets Management
+
 - ✅ **Do this**: Pass env vars at runtime via docker-compose or docker run
 - ✅ **Do this**: Keep `.env.local` only on your private server, never in git
 - ✅ **Do this**: Use PAT tokens with limited scopes for GHCR access
@@ -274,6 +303,7 @@ The GitHub Actions workflow:
 - ❌ **Don't do this**: Use plaintext passwords in docker-compose.yml
 
 ### Environment Variables
+
 - Non-root user runs the container
 - Health checks ensure container stability
 - Environment variables are passed at runtime, not baked into image
@@ -281,6 +311,7 @@ The GitHub Actions workflow:
 - Use PAT tokens instead of passwords for authentication
 
 ### Best Practices
+
 1. **Image is portable**: The built image has NO secrets and can be shared/stored safely
 2. **Secrets at runtime**: Add env vars only when deploying the image
 3. **Server-side secrets**: Keep `.env.local` protected on your docker server

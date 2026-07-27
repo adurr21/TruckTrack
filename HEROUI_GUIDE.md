@@ -71,13 +71,13 @@ import { Input } from "@heroui/react"
 ### Modal
 
 ```tsx
-import { 
-  Modal, 
-  ModalContent, 
-  ModalHeader, 
-  ModalBody, 
+import {
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
   ModalFooter,
-  Button 
+  Button
 } from "@heroui/react"
 import { useState } from "react"
 
@@ -111,7 +111,7 @@ import {
   TableBody,
   TableRow,
   TableCell,
-} from "@heroui/react"
+} from "@heroui/react";
 
 <Table>
   <TableHeader>
@@ -128,29 +128,33 @@ import {
       </TableRow>
     ))}
   </TableBody>
-</Table>
+</Table>;
 ```
 
 ### Card
 
 ```tsx
-import { Card, CardBody, CardHeader } from "@heroui/react"
+import { Card, CardBody, CardHeader } from "@heroui/react";
 
 <Card>
   <CardHeader>Title</CardHeader>
   <CardBody>Content</CardBody>
-</Card>
+</Card>;
 ```
 
 ### Select / Dropdown
 
 ```tsx
-import { Select, SelectItem } from "@heroui/react"
+import { Select, SelectItem } from "@heroui/react";
 
 <Select label="Choose option">
-  <SelectItem key="option1" value="option1">Option 1</SelectItem>
-  <SelectItem key="option2" value="option2">Option 2</SelectItem>
-</Select>
+  <SelectItem key="option1" value="option1">
+    Option 1
+  </SelectItem>
+  <SelectItem key="option2" value="option2">
+    Option 2
+  </SelectItem>
+</Select>;
 ```
 
 ### Chip / Badge
@@ -171,7 +175,7 @@ import { useState } from "react"
 
 const [page, setPage] = useState(1)
 
-<Pagination 
+<Pagination
   isCompact
   showControls
   color="primary"
@@ -193,16 +197,17 @@ import { Spinner } from "@heroui/react"
 ### Tooltip
 
 ```tsx
-import { Tooltip } from "@heroui/react"
+import { Tooltip } from "@heroui/react";
 
 <Tooltip content="Help text">
   <Button>Hover me</Button>
-</Tooltip>
+</Tooltip>;
 ```
 
 ## Component Props
 
 ### Colors
+
 - `primary`
 - `secondary`
 - `success`
@@ -211,6 +216,7 @@ import { Tooltip } from "@heroui/react"
 - `default`
 
 ### Variants
+
 - `solid` - Filled button
 - `bordered` - Outlined button
 - `flat` - Flat button
@@ -219,6 +225,7 @@ import { Tooltip } from "@heroui/react"
 - `faded` - Faded button
 
 ### Sizes
+
 - `sm` - Small
 - `md` - Medium (default)
 - `lg` - Large
@@ -245,6 +252,7 @@ HeroUI automatically respects the theme from `next-themes`. The app already has 
 ## Accessibility
 
 HeroUI components are built with accessibility in mind:
+
 - Proper ARIA labels
 - Keyboard navigation
 - Screen reader support
@@ -287,16 +295,16 @@ module.exports = {
 
 Previously, this project used Joy UI. Key differences:
 
-| Joy UI | HeroUI |
-|--------|--------|
-| `sx={{}}` | Tailwind classes |
+| Joy UI            | HeroUI            |
+| ----------------- | ----------------- |
+| `sx={{}}`         | Tailwind classes  |
 | `variant="solid"` | `variant="solid"` |
 | `color="primary"` | `color="primary"` |
-| `open` prop | `isOpen` prop |
-| `onClose` | `onOpenChange` |
-| `loading` prop | `isLoading` prop |
-| `onClick` | `onPress` |
-| `disabled` | `isDisabled` |
+| `open` prop       | `isOpen` prop     |
+| `onClose`         | `onOpenChange`    |
+| `loading` prop    | `isLoading` prop  |
+| `onClick`         | `onPress`         |
+| `disabled`        | `isDisabled`      |
 
 ## Tips
 

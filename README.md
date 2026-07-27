@@ -1,146 +1,32 @@
 # TruckTrack
 
-A Next.js web application I designed to help truck drivers track and manage their trip information efficiently and accurately while on the road.
+TruckTrack is a Next.js application for recording trucking settlements, protected by Supabase Auth and Postgres RLS.
 
-## Features
+## Local setup
 
-- 📱 Responsive design that works on desktop and mobile devices
-- 🔐 Secure authentication with Supabase
-- 📊 Dashboard to view and manage trip entries
-- 📝 Easy trip data entry including:
-  - Date
-  - Truck number
-  - Dollie number
-  - Origin and destination
-  - Trailer numbers
-  - Pay sheet numbers
-  - Gross pay
-- 📤 Export data to CSV for reporting
-- 🌓 Light/Dark mode support
-- 🐳 Docker support for easy deployment
-- ☁️ GitHub Container Registry integration for private hosting
+Use Node.js 20 or newer. Copy `.env.example` to `.env.local` and set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and `NEXT_PUBLIC_SITE_URL` (usually `http://localhost:3000`). Install and verify with:
 
-## Tech Stack
-
-- [Next.js](https://nextjs.org/) - Latest React framework for web applications
-- [HeroUI](https://heroui.com/) - Modern UI components library
-- [Supabase](https://supabase.com/) - Backend and authentication
-- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
-- [TypeScript](https://www.typescriptlang.org/) - Type safety
-- [Docker](https://www.docker.com/) - Containerization
-
-## Quick Start
-
-### Local Development
-
-```bash
-# Install dependencies
-npm install
-
-# Create environment file
-cp .env.example .env.local
-
-# Add your Supabase credentials to .env.local
-# NEXT_PUBLIC_SUPABASE_URL=...
-# NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-
-# Run development server
-npm run dev
+```sh
+npm ci
+npm run verify
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to see the app.
+Start development with `npm run dev`. The app expects `public.users` and `public.settlements` to be created by the migration in `supabase/migrations/`.
 
-### Docker Deployment
+## Supabase configuration
 
-For detailed Docker setup and GitHub Container Registry hosting instructions, see [DOCKER.md](./DOCKER.md).
+Apply migrations with the Supabase CLI or dashboard. Both public tables must remain protected by RLS. Authenticated users may access only rows whose `user_id` (or profile `id`) equals `auth.uid()`. The profile trigger creates `public.users` rows from `auth.users` metadata, so signup must not insert a nullable or client-selected profile id.
 
-Quick start with Docker:
+Because new Supabase projects may not expose tables to the Data API automatically, the migration includes explicit grants for `authenticated` and `service_role`. Configure the production site URL and exact `/auth/callback` redirect URL in Supabase Auth. Add only the preview URL patterns your deployment needs; never use an arbitrary request origin.
 
-```bash
-# Build image
-npm run docker:build
+## Database types and tests
 
-# Run with Docker Compose
-docker-compose up
-```
+With a linked local Supabase project, regenerate types with `npm run types:generate`. Review the generated file before committing it. SQL policy checks live in `supabase/tests/rls.sql`; the application unit tests cover redirect validation, CSV escaping, and input contracts.
 
-## Project Structure
+The standard gate is `npm run verify`, which runs TypeScript, ESLint, Prettier, Vitest, and the production build. CI runs the same command on Node 20.
 
-```
-├── app/                    # Next.js app directory
-│   ├── (auth-pages)/      # Authentication pages
-│   ├── protected/         # Protected routes
-│   └── auth/              # API routes for auth
-├── components/            # React components
-├── utils/                 # Utility functions
-└── public/                # Static assets
-```
+## Recovery smoke test
 
-## Authentication
+In a preview or local deployment, verify: signup with email confirmation enabled, the confirmation callback, sign-in, password reset, reset-password completion, settlement creation, CSV export, pagination, and deletion of the final row. Confirm that malformed or external `redirect_to` values land on `/protected` and that a second user cannot read or mutate the first user's settlements.
 
-Authentication is handled by Supabase with middleware-based session management. Protected routes automatically redirect unauthenticated users to the sign-in page.
-
-## Deployment
-
-### Vercel (Recommended for Production)
-
-The app is optimized for deployment on Vercel. Connect your GitHub repository and deploy automatically on push.
-
-### Docker (Self-Hosted)
-
-See [DOCKER.md](./DOCKER.md) for:
-- Local Docker setup
-- GitHub Container Registry hosting
-- Private docker server deployment instructions
-
-## Recent Updates
-
-### Refactored to Latest Tech Stack
-- ✅ Migrated from Joy UI to HeroUI for modern UI components
-- ✅ Updated to latest Next.js with optimized performance
-- ✅ Middleware properly configured for latest Next.js versions
-- ✅ Added Docker containerization support
-- ✅ GitHub Actions workflow for automatic image builds to GHCR
-- ✅ Improved TypeScript configuration
-- ✅ Streamlined dependencies
-
-## Environment Variables
-
-Create a `.env.local` file based on `.env.example`:
-
-```
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-```
-
-## Development
-
-```bash
-# Install dependencies
-npm install
-
-# Run dev server
-npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
-
-# Docker commands
-npm run docker:build
-npm run docker:run
-```
-
-## Contributing
-
-Feel free to submit issues and enhancement requests!
-
-## License
-
-MIT
-
-## Support
-
-Created by [Austin Durr](https://austindurr.com)
+The existing `dollie_num` column name is retained for compatibility. A future rename to `dolly_num` requires a migration, regenerated types, and an export/import compatibility decision.

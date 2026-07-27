@@ -35,6 +35,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
 ```
 
 To find these values:
+
 1. Go to your Supabase project dashboard
 2. Click "Settings" → "API"
 3. Copy the "Project URL" and "anon/public" key
@@ -91,6 +92,7 @@ After the refactoring, the key directories are:
 ### UI Framework: Joy UI → HeroUI
 
 **Why HeroUI?**
+
 - More modern and actively maintained
 - Better TypeScript support
 - Excellent accessibility features
@@ -98,6 +100,7 @@ After the refactoring, the key directories are:
 - Responsive component library
 
 **Component Changes:**
+
 - All Joy UI components replaced with HeroUI equivalents
 - Tailwind CSS configuration updated to include HeroUI plugin
 - Components now use `@heroui/react` instead of `@mui/joy`
@@ -105,6 +108,7 @@ After the refactoring, the key directories are:
 ### Next.js Version
 
 The project now uses the latest Next.js with:
+
 - Latest performance optimizations
 - Improved middleware support
 - Better type safety
@@ -113,6 +117,7 @@ The project now uses the latest Next.js with:
 ### Middleware
 
 The middleware setup in `middleware.ts` and `utils/supabase/middleware.ts` handles:
+
 - Session refresh for Supabase authentication
 - Route protection (redirecting unauthenticated users)
 - Cookie management for server-side rendering
@@ -148,6 +153,7 @@ docker-compose up
 ### Option 2: Docker + Self-Hosted Server
 
 See [DOCKER.md](./DOCKER.md) for:
+
 - Building Docker images
 - Pushing to GitHub Container Registry
 - Running on a private docker server
@@ -175,7 +181,8 @@ npm start
 
 ### Issue: Supabase authentication not working
 
-**Solution:** 
+**Solution:**
+
 - Verify credentials in `.env.local`
 - Check Supabase project settings for allowed redirect URLs
 - Ensure Supabase is running and accessible
@@ -183,6 +190,7 @@ npm start
 ### Issue: Middleware errors
 
 **Solution:**
+
 - Middleware runs on every request - check server logs
 - Ensure `updateSession` is properly configured
 - Check middleware matcher pattern matches your routes
@@ -190,6 +198,7 @@ npm start
 ### Issue: Styles not applying (HeroUI components)
 
 **Solution:**
+
 - Ensure `HeroUIProvider` wraps your app in `layout.tsx`
 - Check Tailwind config includes HeroUI content paths
 - Clear `.next` build cache and restart dev server
@@ -197,6 +206,7 @@ npm start
 ### Issue: Docker build fails
 
 **Solution:**
+
 - Ensure Node.js version specified in Dockerfile matches your system
 - Check that all required env vars are available at build time
 - Clear Docker cache: `docker system prune`
@@ -204,12 +214,15 @@ npm start
 ## Performance Tips
 
 1. **Use Next.js Image Optimization**
+
    - Import from `next/image` for automatic optimization
 
 2. **Enable Production Build Caching**
+
    - Docker workflow includes GitHub Actions cache
 
 3. **Monitor Bundle Size**
+
    - HeroUI is well tree-shaken by default
 
 4. **Enable Security Headers**
@@ -218,6 +231,7 @@ npm start
 ## CI/CD Pipeline
 
 GitHub Actions automatically:
+
 - Builds Docker image on push/PR to main/develop
 - Pushes to GHCR on successful merge
 - Tags images with semantic versioning
@@ -240,6 +254,7 @@ npm install package-name@latest
 ### Database Migrations
 
 All changes should be done through Supabase dashboard or migrations:
+
 1. Go to your Supabase project
 2. Use the SQL editor for schema changes
 3. Or use Supabase CLI for migration management

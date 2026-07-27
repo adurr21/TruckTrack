@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   /* Optimized configuration for latest Next.js */
   reactStrictMode: true,
   output: "standalone",
-  
+
   // Image optimization
   images: {
     remotePatterns: [

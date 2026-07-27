@@ -91,7 +91,13 @@ export default function NewDashboardEntryPage() {
               {fields.map(([name, label]) => (
                 <Input
                   key={name}
-                  type={name === "date" ? "date" : name === "pay" ? "number" : "text"}
+                  type={
+                    name === "date"
+                      ? "date"
+                      : name === "pay"
+                        ? "number"
+                        : "text"
+                  }
                   label={label}
                   name={name}
                   value={form[name]}

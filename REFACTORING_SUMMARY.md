@@ -7,6 +7,7 @@ This document summarizes all changes made during the refactoring of TruckTrack t
 ### 1. ✅ UI Framework Migration (Joy UI → HeroUI)
 
 **Changes:**
+
 - Updated `package.json`: Removed `@mui/joy` and related dependencies, added `@heroui/react`, `@heroui/theme`, and `framer-motion`
 - Updated `tailwind.config.ts`: Integrated HeroUI plugin and simplified Tailwind configuration
 - Refactored all components using Joy UI:
@@ -16,6 +17,7 @@ This document summarizes all changes made during the refactoring of TruckTrack t
   - `app/protected/dashboard/page.tsx` - Migrated Table, Modal, Button, Pagination to HeroUI
 
 **Benefits:**
+
 - Modern, actively maintained component library
 - Better TypeScript support
 - Seamless Tailwind CSS integration
@@ -24,6 +26,7 @@ This document summarizes all changes made during the refactoring of TruckTrack t
 - Better performance
 
 **Files Updated:**
+
 - [package.json](package.json)
 - [tailwind.config.ts](tailwind.config.ts)
 - [app/layout.tsx](app/layout.tsx) - Added HeroUIProvider
@@ -35,16 +38,19 @@ This document summarizes all changes made during the refactoring of TruckTrack t
 ### 2. ✅ Next.js Optimization
 
 **Changes:**
+
 - Updated `next.config.ts`: Added security headers, image optimization, and performance configurations
 - Middleware is **NOT deprecated** - properly configured for latest Next.js
 - Updated React and dependencies to latest stable versions
 
 **Files Updated:**
+
 - [next.config.ts](next.config.ts)
 
 ### 3. ✅ Middleware Implementation
 
 The existing middleware in `middleware.ts` is fully compatible with latest Next.js and handles:
+
 - Session refresh for Supabase authentication
 - Route protection and redirects
 - Cookie management for SSR
@@ -52,6 +58,7 @@ The existing middleware in `middleware.ts` is fully compatible with latest Next.
 No breaking changes - middleware continues to work as intended.
 
 **Files:**
+
 - [middleware.ts](middleware.ts) - No changes needed, already compatible
 
 ### 4. ✅ Docker Containerization
@@ -59,6 +66,7 @@ No breaking changes - middleware continues to work as intended.
 **New Files Created:**
 
 - **[Dockerfile](Dockerfile)**
+
   - Multi-stage build for optimized image size
   - Non-root user for security
   - Health checks
@@ -66,6 +74,7 @@ No breaking changes - middleware continues to work as intended.
   - Proper signal handling with dumb-init
 
 - **[docker-compose.yml](docker-compose.yml)**
+
   - Service configuration for local development
   - Environment variable management
   - Network setup
@@ -76,6 +85,7 @@ No breaking changes - middleware continues to work as intended.
   - Reduces image size and build time
 
 **Benefits:**
+
 - Consistent environment across development and production
 - Easy deployment to any server
 - Isolated from system dependencies
@@ -88,16 +98,18 @@ No breaking changes - middleware continues to work as intended.
 - **[.github/workflows/docker-build-push.yml](.github/workflows/docker-build-push.yml)**
   - Automated Docker image building on push
   - Automatic pushing to GHCR on main/develop
-  - Semantic versioning support (v*.*.* tags)
+  - Semantic versioning support (v*.*.\* tags)
   - GitHub Actions caching for faster builds
   - Conditional pushing (only on merges, not PRs)
 
 **Workflow Triggers:**
+
 - Pushes to `main` or `develop` branches
 - Git tags matching `v*` pattern
 - Pull requests (build only, no push)
 
 **Image Tagging:**
+
 - `latest` - Latest version on main branch
 - `develop` - Latest on develop branch
 - `main` - Latest on main branch
@@ -105,6 +117,7 @@ No breaking changes - middleware continues to work as intended.
 - Semantic versions from git tags
 
 **Private Hosting:**
+
 - Images are stored in GitHub Container Registry
 - Private access via GitHub organization
 - Can be pulled to private docker servers
@@ -115,16 +128,19 @@ No breaking changes - middleware continues to work as intended.
 **New Files Created:**
 
 - **[.env.example](.env.example)**
+
   - Template for environment variables
   - Documents required Supabase configuration
 
 - **[DOCKER.md](DOCKER.md)**
+
   - Complete Docker setup guide
   - GHCR authentication and deployment instructions
   - docker-compose configuration examples
   - Troubleshooting guide
 
 - **[INSTALLATION.md](INSTALLATION.md)**
+
   - Comprehensive installation guide
   - Setup instructions for all scenarios
   - Development workflow documentation
@@ -145,18 +161,21 @@ No breaking changes - middleware continues to work as intended.
 ## Files Modified Summary
 
 ### Core Application Files
+
 - `package.json` - Dependency updates and Docker scripts
 - `tailwind.config.ts` - HeroUI plugin integration
 - `next.config.ts` - Security headers and optimizations
 - `app/layout.tsx` - HeroUIProvider wrapper
 
 ### Component Files
+
 - `components/export-csv.tsx` - Joy UI → HeroUI
 - `components/header-auth.tsx` - Joy UI → HeroUI
 - `components/ui/add-settlement.tsx` - Joy UI → HeroUI
 - `app/protected/dashboard/page.tsx` - Joy UI → HeroUI
 
 ### New Files Created
+
 - `Dockerfile` - Container image definition
 - `docker-compose.yml` - Local development setup
 - `.dockerignore` - Docker build optimization
@@ -167,6 +186,7 @@ No breaking changes - middleware continues to work as intended.
 - `HEROUI_GUIDE.md` - Component reference
 
 ### Unchanged Files
+
 - `middleware.ts` - Already compatible with latest Next.js
 - `utils/supabase/` - No changes needed
 - Auth pages and components - Working as-is
@@ -259,6 +279,7 @@ docker-compose up
 ## Final Notes
 
 The refactoring maintains all existing functionality while modernizing the tech stack. The app is now:
+
 - Built on the latest Next.js framework
 - Using modern, well-maintained UI components (HeroUI)
 - Ready for containerized deployment

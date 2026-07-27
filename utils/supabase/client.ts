@@ -1,4 +1,5 @@
 import { createBrowserClient } from "@supabase/ssr";
+import type { Database } from "@/types/database";
 
 declare global {
   interface Window {
@@ -9,7 +10,8 @@ declare global {
   }
 }
 
-let browserClient: ReturnType<typeof createBrowserClient> | null = null;
+let browserClient: ReturnType<typeof createBrowserClient<Database>> | null =
+  null;
 
 function getSupabaseBrowserEnv() {
   if (typeof window !== "undefined") {
@@ -35,7 +37,7 @@ export const createClient = () => {
   }
 
   if (!browserClient) {
-    browserClient = createBrowserClient(url, anonKey);
+    browserClient = createBrowserClient<Database>(url, anonKey);
   }
 
   return browserClient;
