@@ -1,13 +1,8 @@
-
-export default function Header() {
+export default function Hero() {
   return (
     <div className="flex flex-col gap-16 items-center">
       <div className="flex gap-8 justify-center items-center">
-        <a
-          href="/"
-          target="_blank"
-          rel="noreferrer"
-        >
+        <a href="/" target="_blank" rel="noreferrer">
           <h1 className="text-5xl">TruckTrack</h1>
         </a>
       </div>

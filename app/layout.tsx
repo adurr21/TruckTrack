@@ -6,7 +6,7 @@ import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import Link from "next/link";
 // Supports weights 100-900
-import '@fontsource-variable/inter';
+import "@fontsource-variable/inter";
 import "./globals.css";
 
 const defaultUrl = process.env.VERCEL_URL
@@ -43,7 +43,9 @@ export default function RootLayout({
               <nav className="w-full flex justify-center border-b border-b-foreground/10 h-16">
                 <div className="w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm">
                   <div className="flex gap-5 items-center font-semibold">
-                    <Link className="text-2xl" href={"/"}>TruckTrack</Link>
+                    <Link className="text-2xl" href={"/"}>
+                      TruckTrack
+                    </Link>
                   </div>
                   {!hasEnvVars ? <EnvVarWarning /> : <HeaderAuth />}
                 </div>

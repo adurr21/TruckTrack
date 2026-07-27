@@ -20,7 +20,10 @@ export default async function Signup(props: {
 
   return (
     <>
-      <form action={signUpAction} className="flex flex-col min-w-64 max-w-64 mx-auto">
+      <form
+        action={signUpAction}
+        className="flex flex-col min-w-64 max-w-64 mx-auto"
+      >
         <h1 className="text-2xl font-medium">Sign up</h1>
         <p className="text-sm text text-foreground">
           Already have an account?{" "}
@@ -30,20 +33,33 @@ export default async function Signup(props: {
         </p>
         <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
           <Label htmlFor="name">Name</Label>
-          <Input name="name" placeholder="Your name" required />
+          <Input
+            id="name"
+            name="name"
+            autoComplete="name"
+            placeholder="Your name"
+            required
+          />
           <Label htmlFor="email">Email</Label>
-          <Input name="email" placeholder="you@example.com" required />
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            placeholder="you@example.com"
+            required
+          />
           <Label htmlFor="password">Password</Label>
           <Input
             type="password"
+            id="password"
             name="password"
+            autoComplete="new-password"
             placeholder="Your password"
             minLength={6}
             required
           />
-          <SubmitButton pendingText="Signing up...">
-            Sign up
-          </SubmitButton>
+          <SubmitButton pendingText="Signing up...">Sign up</SubmitButton>
           <FormMessage message={searchParams} />
         </div>
       </form>
