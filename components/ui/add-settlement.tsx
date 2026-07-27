@@ -9,7 +9,7 @@ import {
   Box,
   Button,
 } from "@mui/joy";
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import type { SettlementInsert } from "@/types/database";
 
@@ -49,14 +49,19 @@ export default function AddSettlementModal({
   userId,
   onCreated,
 }: Props) {
-  const supabase = useMemo(() => createClient(), []);
+  const [supabase, setSupabase] = useState<ReturnType<
+    typeof createClient
+  > | null>(null);
+  useEffect(() => {
+    setSupabase(createClient());
+  }, []);
   const [form, setForm] = useState(initialForm);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!userId) return setError("You must be signed in.");
+    if (!userId || !supabase) return setError("You must be signed in.");
     if (
       !form.date ||
       fields.some(

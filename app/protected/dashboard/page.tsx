@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -27,7 +27,9 @@ const formatDate = (date: string) =>
   );
 
 export default function Dashboard() {
-  const supabase = useMemo(() => createClient(), []);
+  const [supabase, setSupabase] = useState<ReturnType<
+    typeof createClient
+  > | null>(null);
   const [data, setData] = useState<Settlement[]>([]);
   const [total, setTotal] = useState(0);
   const [userId, setUserId] = useState<string | null>(null);
@@ -41,6 +43,7 @@ export default function Dashboard() {
   const pageCount = Math.ceil(total / PAGE_SIZE);
 
   const fetchData = useCallback(async () => {
+    if (!supabase) return;
     setLoading(true);
     setError(null);
     const { data: auth } = await supabase.auth.getUser();
@@ -73,6 +76,9 @@ export default function Dashboard() {
   }, [page, supabase]);
 
   useEffect(() => {
+    setSupabase(createClient());
+  }, []);
+  useEffect(() => {
     void fetchData();
   }, [fetchData]);
   useEffect(() => {
@@ -80,7 +86,7 @@ export default function Dashboard() {
   }, [page, pageCount]);
 
   const handleDelete = async () => {
-    if (!deleteId || !userId || deleting) return;
+    if (!deleteId || !userId || !supabase || deleting) return;
     setDeleting(true);
     setError(null);
     const { error: deleteError } = await supabase
