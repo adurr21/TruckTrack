@@ -170,12 +170,7 @@ services:
       - .env.local # ⚠️ This file stays on your server, NEVER in git
     restart: unless-stopped
     healthcheck:
-      test:
-        [
-          "CMD",
-          "node",
-          "-e",
-        ]
+      test: ["CMD", "node", "-e"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -218,12 +213,7 @@ services:
       - .env.local
     restart: unless-stopped
     healthcheck:
-      test:
-        [
-          "CMD",
-          "node",
-          "-e",
-        ]
+      test: ["CMD", "node", "-e"]
       interval: 30s
       timeout: 10s
       retries: 3
