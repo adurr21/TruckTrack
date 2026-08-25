@@ -302,45 +302,52 @@ export default function Dashboard() {
           color="primary"
           selectionMode="none"
           classNames={{
-            wrapper: "min-h-[200px]",
+            base: "w-full",
+            wrapper: "min-h-[620px] overflow-auto",
+            table: "table-fixed min-w-[1150px]",
+            tr: "h-12",
             th: "bg-primary text-primary-foreground text-xs uppercase",
+            td: "h-12 max-w-0 overflow-hidden text-ellipsis whitespace-nowrap",
           }}
         >
           <TableHeader>
-            <TableColumn>
+            <TableColumn className="w-[110px]">
               <SortHeader column="date" label={labels.date} />
             </TableColumn>
-            <TableColumn>
+            <TableColumn className="w-[100px]">
               <SortHeader column="truck_num" label={labels.truck_num} />
             </TableColumn>
-            <TableColumn>
+            <TableColumn className="w-[100px]">
               <SortHeader column="dollie_num" label={labels.dollie_num} />
             </TableColumn>
-            <TableColumn>
+            <TableColumn className="w-[150px]">
               <SortHeader column="to" label={labels.to} />
             </TableColumn>
-            <TableColumn>
+            <TableColumn className="w-[150px]">
               <SortHeader column="from" label={labels.from} />
             </TableColumn>
-            <TableColumn>
+            <TableColumn className="w-[110px]">
               <SortHeader column="pro_no" label={labels.pro_no} />
             </TableColumn>
-            <TableColumn>
+            <TableColumn className="w-[110px]">
               <SortHeader column="trailer_num" label={labels.trailer_num} />
             </TableColumn>
-            <TableColumn>
+            <TableColumn className="w-[130px]">
               <SortHeader column="paysheet_num" label={labels.paysheet_num} />
             </TableColumn>
-            <TableColumn>
+            <TableColumn className="w-[120px]">
               <SortHeader column="pay" label={labels.pay} />
             </TableColumn>
-            <TableColumn>Actions</TableColumn>
+            <TableColumn className="w-[72px]">Actions</TableColumn>
           </TableHeader>
           <TableBody
             emptyContent={
               loading
                 ? "Loading settlements…"
-                : "No job entries yet. Create one to get started."
+                : sortedData.length === 0 &&
+                    (search || Object.values(filters).some(Boolean))
+                  ? "No settlements match the current filters."
+                  : "No job entries yet. Create one to get started."
             }
           >
             {visibleData.map((row) => (
