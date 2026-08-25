@@ -9,25 +9,22 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
+      # Keep a fault in the app from consuming all memory on the host. Docker
+      # restarts the container if Node reaches this heap limit.
+      - NODE_OPTIONS=--max-old-space-size=384
       - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
       - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
     env_file:
       - .env.local
     restart: unless-stopped
     healthcheck:
-      test:
-        [
-          "CMD",
-          "wget",
-          "--quiet",
-          "--tries=1",
-          "--spider",
-          "http://localhost:3000",
-        ]
+      test: ["CMD", "node", "-e"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
+    mem_limit: 512m
+    cpus: 1.0
     networks:
       - trucktrack-network
 

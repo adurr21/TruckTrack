@@ -16,22 +16,25 @@ COPY . .
 RUN npm run build
 
 # Production stage
-FROM node:20-alpine
+FROM node:20-alpine AS runner
 
 WORKDIR /app
 
-# Install dumb-init to handle signals properly
+# Use the standalone Next.js output. It includes only the traced runtime files,
+# rather than a second full node_modules installation.
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+# Bound the V8 heap even when the image is started with `docker run` rather
+# than the provided Compose file. Compose also caps the complete container.
+ENV NODE_OPTIONS=--max-old-space-size=384
+
+# Handle signals correctly when Docker stops or restarts the container.
 RUN apk add --no-cache dumb-init
 
-# Copy package files
-COPY package*.json ./
-
-# Install production dependencies only
-RUN npm ci --only=production
-
-# Copy built application from builder
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/next.config.ts ./
+# Copy the self-contained production server and its static assets.
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S nodejs
@@ -41,10 +44,11 @@ USER nextjs
 # Expose port
 EXPOSE 3000
 
-# Health check
+# This must not hit `/`: that route runs Supabase session middleware and can
+# leave health-check requests waiting on an unavailable external dependency.
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
+  CMD node -e "const http=require('http');const request=http.get('http://127.0.0.1:3000/health',response=>process.exit(response.statusCode===200?0:1));request.on('error',()=>process.exit(1));request.setTimeout(2000,()=>{request.destroy();process.exit(1)})"
 
 # Run application with dumb-init
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["node_modules/.bin/next", "start"]
+CMD ["node", "server.js"]
