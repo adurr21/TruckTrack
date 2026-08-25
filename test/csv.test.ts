@@ -20,4 +20,10 @@ describe("CSV export", () => {
     expect(settlementsToCsv([row])).toContain("'=SUM(1,1)");
     expect(settlementsToCsv([row])).toContain("\uFEFF");
   });
+
+  it("exports a blank value when pay is null at runtime", () => {
+    const rowWithMissingPay = { ...row, pay: null } as unknown as typeof row;
+    expect(() => settlementsToCsv([rowWithMissingPay])).not.toThrow();
+    expect(settlementsToCsv([rowWithMissingPay])).toContain('"p",""');
+  });
 });
