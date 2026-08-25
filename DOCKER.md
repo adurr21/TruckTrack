@@ -133,7 +133,8 @@ docker pull ghcr.io/your-username/your-repo:latest
 **Option A: Command Line (for testing)**
 
 ```bash
-docker run -p 3000:3000 \
+docker run -p 3000:3000 --memory=512m --memory-swap=512m --cpus=1 \
+  -e NODE_OPTIONS="--max-old-space-size=384" \
   -e NEXT_PUBLIC_SUPABASE_URL="https://your-project.supabase.co" \
   -e NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key" \
   ghcr.io/your-username/your-repo:latest
@@ -162,6 +163,7 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
+      - NODE_OPTIONS=--max-old-space-size=384
       - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
       - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
     env_file:
@@ -171,16 +173,15 @@ services:
       test:
         [
           "CMD",
-          "wget",
-          "--quiet",
-          "--tries=1",
-          "--spider",
-          "http://localhost:3000",
+          "node",
+          "-e",
         ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
+    mem_limit: 512m
+    cpus: 1.0
 ```
 
 Create `.env.local` on your server:
@@ -210,6 +211,7 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
+      - NODE_OPTIONS=--max-old-space-size=384
       - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
       - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
     env_file:
@@ -219,16 +221,15 @@ services:
       test:
         [
           "CMD",
-          "wget",
-          "--quiet",
-          "--tries=1",
-          "--spider",
-          "http://localhost:3000",
+          "node",
+          "-e",
         ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 10s
+    mem_limit: 512m
+    cpus: 1.0
 ```
 
 Then run:
