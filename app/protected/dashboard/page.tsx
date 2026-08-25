@@ -17,7 +17,7 @@ import {
   ModalFooter,
   ModalHeader,
 } from "@heroui/react";
-import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Ellipsis, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import type { Settlement } from "@/types/database";
@@ -58,6 +58,18 @@ const EMPTY_FILTERS: ColumnFilters = {
   trailer_num: "",
   paysheet_num: "",
   pay: "",
+};
+
+const TRUNCATION_LIMITS: Record<FilterKey, number> = {
+  date: 12,
+  truck_num: 10,
+  dollie_num: 10,
+  to: 18,
+  from: 18,
+  pro_no: 12,
+  trailer_num: 12,
+  paysheet_num: 14,
+  pay: 16,
 };
 
 export default function Dashboard() {
@@ -232,6 +244,36 @@ export default function Dashboard() {
     paysheet_num: "Pay Sheet #",
     pay: "Gross Pay",
   };
+  const getDisplayValues = (row: Settlement) => ({
+    date: formatDate(row.date),
+    truck_num: row.truck_num,
+    dollie_num: row.dollie_num,
+    to: row.to,
+    from: row.from,
+    pro_no: row.pro_no,
+    trailer_num: row.trailer_num,
+    paysheet_num: row.paysheet_num,
+    pay: USD_FORMATTER.format(row.pay),
+  });
+  const hasTruncatedValue = (row: Settlement) => {
+    const values = getDisplayValues(row);
+    return (Object.keys(TRUNCATION_LIMITS) as FilterKey[]).some(
+      (key) => values[key].length > TRUNCATION_LIMITS[key],
+    );
+  };
+  const DetailCell = ({ row, value }: { row: Settlement; value: string }) => (
+    <button
+      type="button"
+      className="block max-w-full truncate text-left hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      title="Click to view the full value"
+      onClick={(event) => {
+        event.stopPropagation();
+        setSelectedRow(row);
+      }}
+    >
+      {value}
+    </button>
+  );
   return (
     <section className="flex flex-col items-center gap-6">
       <h1 className="text-center text-3xl font-bold">TruckTrack Dashboard</h1>
@@ -357,15 +399,56 @@ export default function Dashboard() {
           >
             {visibleData.map((row) => (
               <TableRow key={row.sheet_id}>
-                <TableCell>{formatDate(row.date)}</TableCell>
-                <TableCell>{row.truck_num}</TableCell>
-                <TableCell>{row.dollie_num}</TableCell>
-                <TableCell>{row.to}</TableCell>
-                <TableCell>{row.from}</TableCell>
-                <TableCell>{row.pro_no}</TableCell>
-                <TableCell>{row.trailer_num}</TableCell>
-                <TableCell>{row.paysheet_num}</TableCell>
-                <TableCell>{USD_FORMATTER.format(row.pay)}</TableCell>
+                <TableCell>
+                  <div className="flex min-w-0 items-center gap-1">
+                    <DetailCell row={row} value={getDisplayValues(row).date} />
+                    {hasTruncatedValue(row) && (
+                      <span
+                        className="shrink-0 text-warning"
+                        title="Some values in this row are shortened. Click a value to view the full details."
+                        aria-label="Some values in this row are shortened"
+                      >
+                        <Ellipsis aria-hidden="true" size={16} />
+                      </span>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <DetailCell
+                    row={row}
+                    value={getDisplayValues(row).truck_num}
+                  />
+                </TableCell>
+                <TableCell>
+                  <DetailCell
+                    row={row}
+                    value={getDisplayValues(row).dollie_num}
+                  />
+                </TableCell>
+                <TableCell>
+                  <DetailCell row={row} value={getDisplayValues(row).to} />
+                </TableCell>
+                <TableCell>
+                  <DetailCell row={row} value={getDisplayValues(row).from} />
+                </TableCell>
+                <TableCell>
+                  <DetailCell row={row} value={getDisplayValues(row).pro_no} />
+                </TableCell>
+                <TableCell>
+                  <DetailCell
+                    row={row}
+                    value={getDisplayValues(row).trailer_num}
+                  />
+                </TableCell>
+                <TableCell>
+                  <DetailCell
+                    row={row}
+                    value={getDisplayValues(row).paysheet_num}
+                  />
+                </TableCell>
+                <TableCell>
+                  <DetailCell row={row} value={getDisplayValues(row).pay} />
+                </TableCell>
                 <TableCell>
                   <Button
                     isIconOnly
