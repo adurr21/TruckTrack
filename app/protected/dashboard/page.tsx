@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Button,
+  Input,
   Pagination,
   Table,
   TableBody,
@@ -34,6 +35,8 @@ type SortKey =
   | "paysheet_num"
   | "pay";
 type SortOrder = "asc" | "desc";
+type FilterKey = SortKey;
+type ColumnFilters = Record<FilterKey, string>;
 const USD_FORMATTER = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
@@ -45,67 +48,128 @@ const formatDate = (date: string) =>
     new Date(`${date}T00:00:00Z`),
   );
 
+const EMPTY_FILTERS: ColumnFilters = {
+  date: "",
+  truck_num: "",
+  dollie_num: "",
+  to: "",
+  from: "",
+  pro_no: "",
+  trailer_num: "",
+  paysheet_num: "",
+  pay: "",
+};
+
 export default function Dashboard() {
   const router = useRouter();
-  const [supabase, setSupabase] = useState<ReturnType<
-    typeof createClient
-  > | null>(null);
   const [data, setData] = useState<Settlement[]>([]);
-  const [total, setTotal] = useState(0);
   const [userId, setUserId] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState<SortKey>("date");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
+  const [search, setSearch] = useState("");
+  const [filters, setFilters] = useState<ColumnFilters>(EMPTY_FILTERS);
+  const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const pageCount = Math.ceil(total / PAGE_SIZE);
-
   const fetchData = useCallback(async () => {
-    if (!supabase) return;
+    const supabase = createClient();
     setLoading(true);
     setError(null);
     const { data: auth, error: authError } = await supabase.auth.getUser();
     if (authError || !auth.user) {
       setUserId(null);
       setData([]);
-      setTotal(0);
       setLoading(false);
       if (authError) setError("Could not verify your session.");
       return;
     }
     setUserId(auth.user.id);
-    const from = (page - 1) * PAGE_SIZE;
-    const {
-      data: rows,
-      count,
-      error: queryError,
-    } = await supabase
+    const { data: rows, error: queryError } = await supabase
       .from("settlements")
-      .select("*", { count: "exact" })
+      .select("*")
       .eq("user_id", auth.user.id)
-      .order(sortBy, { ascending: sortOrder === "asc" })
-      .order("sheet_id", { ascending: true })
-      .range(from, from + PAGE_SIZE - 1);
+      .order("date", { ascending: false })
+      .order("sheet_id", { ascending: true });
     if (queryError) setError("Could not load settlements.");
-    else {
-      setData(rows ?? []);
-      setTotal(count ?? 0);
-    }
+    else setData(rows ?? []);
     setLoading(false);
-  }, [page, sortBy, sortOrder, supabase]);
-
-  useEffect(() => {
-    setSupabase(createClient());
   }, []);
+
   useEffect(() => {
     void fetchData();
   }, [fetchData]);
+
+  const filteredData = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
+    return data.filter((row) => {
+      const values = {
+        date: formatDate(row.date),
+        truck_num: row.truck_num,
+        dollie_num: row.dollie_num,
+        to: row.to,
+        from: row.from,
+        pro_no: row.pro_no,
+        trailer_num: row.trailer_num,
+        paysheet_num: row.paysheet_num,
+        pay: String(row.pay),
+      } satisfies Record<FilterKey, string>;
+      const matchesSearch =
+        !normalizedSearch ||
+        Object.values(values).some((value) =>
+          value.toLowerCase().includes(normalizedSearch),
+        );
+      const matchesFilters = Object.entries(filters).every(
+        ([key, value]) =>
+          !value.trim() ||
+          values[key as FilterKey]
+            .toLowerCase()
+            .includes(value.trim().toLowerCase()),
+      );
+      return matchesSearch && matchesFilters;
+    });
+  }, [data, filters, search]);
+
+  const sortedData = useMemo(() => {
+    return [...filteredData].sort((a, b) => {
+      const aValue = a[sortBy];
+      const bValue = b[sortBy];
+      const comparison =
+        typeof aValue === "number" && typeof bValue === "number"
+          ? aValue - bValue
+          : String(aValue).localeCompare(String(bValue), undefined, {
+              numeric: true,
+              sensitivity: "base",
+            });
+      return sortOrder === "asc" ? comparison : -comparison;
+    });
+  }, [filteredData, sortBy, sortOrder]);
+
+  const pageCount = Math.ceil(sortedData.length / PAGE_SIZE);
+  const visibleData = sortedData.slice(
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE,
+  );
+
   useEffect(() => {
-    if (pageCount > 0 && page > pageCount) setPage(pageCount);
-  }, [page, pageCount]);
+    setPage((currentPage) =>
+      pageCount > 0 ? Math.min(currentPage, pageCount) : 1,
+    );
+  }, [pageCount]);
+
+  const updateFilter = (key: FilterKey, value: string) => {
+    setFilters((currentFilters) => ({ ...currentFilters, [key]: value }));
+    setPage(1);
+  };
+
+  const clearFilters = () => {
+    setSearch("");
+    setFilters(EMPTY_FILTERS);
+    setPage(1);
+  };
 
   const handleSort = (key: SortKey) => {
     setSortOrder(sortBy === key && sortOrder === "asc" ? "desc" : "asc");
@@ -113,7 +177,8 @@ export default function Dashboard() {
     setPage(1);
   };
   const handleDelete = async () => {
-    if (!supabase || !deleteId || !userId || deleting) return;
+    if (!deleteId || !userId || deleting) return;
+    const supabase = createClient();
     setDeleting(true);
     setError(null);
     const { error: deleteError } = await supabase
@@ -128,7 +193,9 @@ export default function Dashboard() {
     }
     setConfirmOpen(false);
     setDeleteId(null);
-    void fetchData();
+    setData((currentData) =>
+      currentData.filter((settlement) => settlement.sheet_id !== deleteId),
+    );
   };
   const SortHeader = ({
     column,
@@ -177,6 +244,51 @@ export default function Dashboard() {
           Create Job Entry
         </Button>
         <ExportCSVButton data={data} filename="settlements.csv" />
+      </div>
+      <div className="flex w-full flex-col gap-3">
+        <Input
+          aria-label="Search settlements"
+          className="mx-auto max-w-xl"
+          label="Search all columns"
+          placeholder="Search by truck, destination, pay, or any other value"
+          value={search}
+          onValueChange={(value) => {
+            setSearch(value);
+            setPage(1);
+          }}
+          isClearable
+          onClear={() => {
+            setSearch("");
+            setPage(1);
+          }}
+        />
+        <div className="flex justify-center gap-3">
+          <Button
+            variant="flat"
+            onPress={() => setShowFilters((shown) => !shown)}
+          >
+            {showFilters ? "Hide column filters" : "Show column filters"}
+          </Button>
+          {(search || Object.values(filters).some(Boolean)) && (
+            <Button variant="light" onPress={clearFilters}>
+              Clear filters
+            </Button>
+          )}
+        </div>
+        {showFilters && (
+          <div className="grid grid-cols-1 gap-3 rounded-lg bg-default-100 p-4 sm:grid-cols-2 lg:grid-cols-3">
+            {(Object.keys(labels) as FilterKey[]).map((key) => (
+              <Input
+                key={key}
+                aria-label={`Filter by ${labels[key]}`}
+                label={labels[key]}
+                placeholder={`Filter ${labels[key].toLowerCase()}`}
+                value={filters[key]}
+                onValueChange={(value) => updateFilter(key, value)}
+              />
+            ))}
+          </div>
+        )}
       </div>
       {error && (
         <p role="alert" className="text-sm text-danger">
@@ -231,7 +343,7 @@ export default function Dashboard() {
                 : "No job entries yet. Create one to get started."
             }
           >
-            {data.map((row) => (
+            {visibleData.map((row) => (
               <TableRow key={row.sheet_id}>
                 <TableCell>{formatDate(row.date)}</TableCell>
                 <TableCell>{row.truck_num}</TableCell>
@@ -266,7 +378,9 @@ export default function Dashboard() {
         {pageCount ? (
           <>
             <span className="text-sm">
-              Page {page} of {pageCount}
+              Showing {Math.min((page - 1) * PAGE_SIZE + 1, sortedData.length)}–
+              {Math.min(page * PAGE_SIZE, sortedData.length)} of{" "}
+              {sortedData.length}
             </span>
             <Pagination
               isCompact
