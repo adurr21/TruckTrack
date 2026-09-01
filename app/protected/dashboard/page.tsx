@@ -17,7 +17,7 @@ import {
   ModalFooter,
   ModalHeader,
 } from "@heroui/react";
-import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Ellipsis, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import type { Settlement } from "@/types/database";
@@ -60,12 +60,25 @@ const EMPTY_FILTERS: ColumnFilters = {
   pay: "",
 };
 
+const TRUNCATION_LIMITS: Record<FilterKey, number> = {
+  date: 12,
+  truck_num: 10,
+  dollie_num: 10,
+  to: 18,
+  from: 18,
+  pro_no: 12,
+  trailer_num: 12,
+  paysheet_num: 14,
+  pay: 16,
+};
+
 export default function Dashboard() {
   const router = useRouter();
   const [data, setData] = useState<Settlement[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [selectedRow, setSelectedRow] = useState<Settlement | null>(null);
   const [page, setPage] = useState(1);
   const [sortBy, setSortBy] = useState<SortKey>("date");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
@@ -231,6 +244,36 @@ export default function Dashboard() {
     paysheet_num: "Pay Sheet #",
     pay: "Gross Pay",
   };
+  const getDisplayValues = (row: Settlement) => ({
+    date: formatDate(row.date),
+    truck_num: row.truck_num,
+    dollie_num: row.dollie_num,
+    to: row.to,
+    from: row.from,
+    pro_no: row.pro_no,
+    trailer_num: row.trailer_num,
+    paysheet_num: row.paysheet_num,
+    pay: USD_FORMATTER.format(row.pay),
+  });
+  const hasTruncatedValue = (row: Settlement) => {
+    const values = getDisplayValues(row);
+    return (Object.keys(TRUNCATION_LIMITS) as FilterKey[]).some(
+      (key) => values[key].length > TRUNCATION_LIMITS[key],
+    );
+  };
+  const DetailCell = ({ row, value }: { row: Settlement; value: string }) => (
+    <button
+      type="button"
+      className="block max-w-full truncate text-left hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+      title="Click to view the full value"
+      onClick={(event) => {
+        event.stopPropagation();
+        setSelectedRow(row);
+      }}
+    >
+      {value}
+    </button>
+  );
   return (
     <section className="flex flex-col items-center gap-6">
       <h1 className="text-center text-3xl font-bold">TruckTrack Dashboard</h1>
@@ -295,65 +338,117 @@ export default function Dashboard() {
           {error}
         </p>
       )}
-      <div className="w-full overflow-x-auto rounded-lg shadow">
+      <div className="w-full rounded-lg shadow">
         <Table
           aria-label="settlements table"
           isStriped
           color="primary"
           selectionMode="none"
+          onRowAction={(key) => {
+            const row = data.find((settlement) => settlement.sheet_id === key);
+            if (row) setSelectedRow(row);
+          }}
           classNames={{
-            wrapper: "min-h-[200px]",
-            th: "bg-primary text-primary-foreground text-xs uppercase",
+            base: "w-full",
+            wrapper: "min-h-[620px] overflow-hidden",
+            table: "w-full table-fixed",
+            tr: "h-12 cursor-pointer",
+            th: "bg-primary text-primary-foreground whitespace-nowrap text-xs uppercase",
+            td: "h-12 max-w-0 overflow-hidden text-ellipsis whitespace-nowrap",
           }}
         >
           <TableHeader>
-            <TableColumn>
+            <TableColumn className="w-[9%]">
               <SortHeader column="date" label={labels.date} />
             </TableColumn>
-            <TableColumn>
+            <TableColumn className="w-[8%]">
               <SortHeader column="truck_num" label={labels.truck_num} />
             </TableColumn>
-            <TableColumn>
+            <TableColumn className="w-[8%]">
               <SortHeader column="dollie_num" label={labels.dollie_num} />
             </TableColumn>
-            <TableColumn>
+            <TableColumn className="w-[14%]">
               <SortHeader column="to" label={labels.to} />
             </TableColumn>
-            <TableColumn>
+            <TableColumn className="w-[14%]">
               <SortHeader column="from" label={labels.from} />
             </TableColumn>
-            <TableColumn>
+            <TableColumn className="w-[9%]">
               <SortHeader column="pro_no" label={labels.pro_no} />
             </TableColumn>
-            <TableColumn>
+            <TableColumn className="w-[10%]">
               <SortHeader column="trailer_num" label={labels.trailer_num} />
             </TableColumn>
-            <TableColumn>
+            <TableColumn className="w-[11%]">
               <SortHeader column="paysheet_num" label={labels.paysheet_num} />
             </TableColumn>
-            <TableColumn>
+            <TableColumn className="w-[10%]">
               <SortHeader column="pay" label={labels.pay} />
             </TableColumn>
-            <TableColumn>Actions</TableColumn>
+            <TableColumn className="w-[7%]">Actions</TableColumn>
           </TableHeader>
           <TableBody
             emptyContent={
               loading
                 ? "Loading settlements…"
-                : "No job entries yet. Create one to get started."
+                : sortedData.length === 0 &&
+                    (search || Object.values(filters).some(Boolean))
+                  ? "No settlements match the current filters."
+                  : "No job entries yet. Create one to get started."
             }
           >
             {visibleData.map((row) => (
               <TableRow key={row.sheet_id}>
-                <TableCell>{formatDate(row.date)}</TableCell>
-                <TableCell>{row.truck_num}</TableCell>
-                <TableCell>{row.dollie_num}</TableCell>
-                <TableCell>{row.to}</TableCell>
-                <TableCell>{row.from}</TableCell>
-                <TableCell>{row.pro_no}</TableCell>
-                <TableCell>{row.trailer_num}</TableCell>
-                <TableCell>{row.paysheet_num}</TableCell>
-                <TableCell>{USD_FORMATTER.format(row.pay)}</TableCell>
+                <TableCell>
+                  <div className="flex min-w-0 items-center gap-1">
+                    <DetailCell row={row} value={getDisplayValues(row).date} />
+                    {hasTruncatedValue(row) && (
+                      <span
+                        className="shrink-0 text-warning"
+                        title="Some values in this row are shortened. Click a value to view the full details."
+                        aria-label="Some values in this row are shortened"
+                      >
+                        <Ellipsis aria-hidden="true" size={16} />
+                      </span>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <DetailCell
+                    row={row}
+                    value={getDisplayValues(row).truck_num}
+                  />
+                </TableCell>
+                <TableCell>
+                  <DetailCell
+                    row={row}
+                    value={getDisplayValues(row).dollie_num}
+                  />
+                </TableCell>
+                <TableCell>
+                  <DetailCell row={row} value={getDisplayValues(row).to} />
+                </TableCell>
+                <TableCell>
+                  <DetailCell row={row} value={getDisplayValues(row).from} />
+                </TableCell>
+                <TableCell>
+                  <DetailCell row={row} value={getDisplayValues(row).pro_no} />
+                </TableCell>
+                <TableCell>
+                  <DetailCell
+                    row={row}
+                    value={getDisplayValues(row).trailer_num}
+                  />
+                </TableCell>
+                <TableCell>
+                  <DetailCell
+                    row={row}
+                    value={getDisplayValues(row).paysheet_num}
+                  />
+                </TableCell>
+                <TableCell>
+                  <DetailCell row={row} value={getDisplayValues(row).pay} />
+                </TableCell>
                 <TableCell>
                   <Button
                     isIconOnly
@@ -361,6 +456,7 @@ export default function Dashboard() {
                     color="danger"
                     variant="light"
                     isDisabled={deleting}
+                    onClick={(event) => event.stopPropagation()}
                     onPress={() => {
                       setDeleteId(row.sheet_id);
                       setConfirmOpen(true);
@@ -412,6 +508,62 @@ export default function Dashboard() {
             </Button>
             <Button color="danger" isLoading={deleting} onPress={handleDelete}>
               Delete
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      <Modal
+        isOpen={Boolean(selectedRow)}
+        size="2xl"
+        onOpenChange={(open) => {
+          if (!open) setSelectedRow(null);
+        }}
+      >
+        <ModalContent>
+          <ModalHeader>Settlement details</ModalHeader>
+          <ModalBody>
+            {selectedRow && (
+              <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
+                <div>
+                  <dt className="text-sm text-default-500">Date</dt>
+                  <dd className="break-words font-medium">
+                    {formatDate(selectedRow.date)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-sm text-default-500">Gross Pay</dt>
+                  <dd className="break-words font-medium">
+                    {USD_FORMATTER.format(selectedRow.pay)}
+                  </dd>
+                </div>
+                {(
+                  [
+                    ["Truck #", selectedRow.truck_num],
+                    ["Dollie #", selectedRow.dollie_num],
+                    ["To", selectedRow.to],
+                    ["From", selectedRow.from],
+                    ["Pro No", selectedRow.pro_no],
+                    ["Trailer #", selectedRow.trailer_num],
+                    ["Pay Sheet #", selectedRow.paysheet_num],
+                    ["Sheet ID", selectedRow.sheet_id],
+                    [
+                      "Created",
+                      new Date(selectedRow.created_at).toLocaleString(),
+                    ],
+                    ["User ID", selectedRow.user_id],
+                  ] as const
+                ).map(([label, value]) => (
+                  <div key={label}>
+                    <dt className="text-sm text-default-500">{label}</dt>
+                    <dd className="break-words font-medium">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+          </ModalBody>
+          <ModalFooter>
+            <Button variant="light" onPress={() => setSelectedRow(null)}>
+              Close
             </Button>
           </ModalFooter>
         </ModalContent>

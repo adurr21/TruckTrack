@@ -18,8 +18,15 @@ export function escapeCsvValue(value: unknown) {
   const safe = /^[=+\-@]/.test(text) ? `'${text}` : text;
   return `"${safe.replace(/"/g, '""')}"`;
 }
+
+function formatPay(value: unknown) {
+  if (value == null || value === "") return "";
+  const amount = Number(value);
+  return Number.isFinite(amount) ? amount.toFixed(2) : String(value);
+}
+
 export function settlementsToCsv(data: Settlement[]) {
-  return `\uFEFF${SETTLEMENT_CSV_COLUMNS.map(([, header]) => escapeCsvValue(header)).join(",")}\n${data.map((row) => SETTLEMENT_CSV_COLUMNS.map(([key]) => escapeCsvValue(key === "pay" ? row.pay.toFixed(2) : row[key])).join(",")).join("\n")}`;
+  return `\uFEFF${SETTLEMENT_CSV_COLUMNS.map(([, header]) => escapeCsvValue(header)).join(",")}\n${data.map((row) => SETTLEMENT_CSV_COLUMNS.map(([key]) => escapeCsvValue(key === "pay" ? formatPay(row.pay) : row[key])).join(",")).join("\n")}`;
 }
 export default function ExportCSVButton({
   data,
